@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>try { if (localStorage.getItem("loyIntroSeen") && !/[?&]intro\b/.test(location.search)) document.documentElement.classList.add("no-intro"); } catch (e) {}</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Play</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="is-play">
+
+  <!-- ===== Top nav (always visible) ===== -->
+  <header class="nav">
+    <nav class="nav-left">
+      <a href="#shop" data-go="shop">Shop</a><span aria-hidden="true">·</span>
+      <a href="#" id="resetProgress" title="Reset the glowing fish">Reset</a><span aria-hidden="true">·</span>
+      <a href="#play" data-go="play">Home</a><span aria-hidden="true">·</span>
+      <a href="#moments" data-go="moments">Moments</a>
+    </nav>
+    <!-- LOGO: edit these two files in assets/logo/ (dark one shows on light pages, light one on the dark Play page) -->
+    <a href="#play" class="logo" data-go="play" aria-label="Home">
+      <img class="logo-dark" src="assets/logo/logo-dark.png" alt="Logo">
+      <img class="logo-light" src="assets/logo/logo-light.png" alt="">
+    </a>
+    <nav class="nav-right">
+      <a href="#festival" data-go="festival">Loy Krathong</a><span aria-hidden="true">·</span>
+      <a href="#us" data-go="us">About us</a>
+    </nav>
+  </header>
+
+  <!-- ===== Phone bottom bar (swipe sideways for more) ===== -->
+  <nav class="dock" id="dock" aria-label="Main">
+    <div class="dock-in">
+      <a href="#play" data-go="play">Home</a>
+      <a href="#festival" data-go="festival">About</a>
+      <a href="#moments" data-go="moments">Moments</a>
+      <a href="#shop" data-go="shop">Shop</a>
+      <a href="#us" data-go="us">About us</a>
+      <a href="#" id="dockReset">Reset</a>
+    </div>
+  </nav>
+
+  <!-- ===== VIEW: Play (world of characters) ===== -->
+  <section class="view active" id="view-play">
+    <div id="world">
+      <div id="worldInner">
+        <img id="worldBg" src="assets/art/world-bg.webp" alt="" draggable="false">
+
+        <!-- Map labels. --x / --y are positions in the 2000x1414 layout file (centre of the text),
+             --fs is font size, --r is tilt, --d is the fade-in delay. Edit freely. -->
+        <p class="w-label" style="--x:1132; --y:480; --r:-6deg; --fs:26; --d:1.4s">a new challenge<br>each month</p>
+        <p class="w-label" style="--x:186; --y:758; --r:-5deg; --fs:34; --d:1.8s">more coming<br>next month</p>
+        <p class="w-label" style="--x:1606; --y:882; --r:-4deg; --fs:34; --d:2.2s">more coming<br>next month</p>
+        <p class="w-label w-big" style="--x:1020; --y:869; --r:-2deg; --fs:48; --d:.6s">Explore the story<br>of Loy Krathong</p>
+        <p class="w-label" id="dragLabel" style="--x:660; --y:1034; --r:2deg; --fs:36; --d:1s">drag to move<br>around!</p>
+        <img class="w-ghost" src="assets/art/ghost-arrow.png" alt="" draggable="false" style="--x:1583; --y:608; --w:269">
+      </div>
+    </div>
+
+    <!-- speech bubble shown next to a clicked character -->
+    <div class="bubble" id="bubble" aria-live="polite">
+      <p class="bubble-text" id="bubbleText"></p>
+      <p class="bubble-diff" id="bubbleDiff"></p>
+      <button class="pill pill-solid" data-activity="about">About</button>
+      <button class="pill pill-solid" data-activity="game">Defend the river</button>
+    </div>
+    <p class="pan-hint" id="panHint" aria-hidden="true"></p>
+  </section>
+
+  <!-- ===== VIEW: About a river (opened from a fish's speech bubble) ===== -->
+  <section class="view" id="view-about">
+    <div class="about">
+      <div class="about-text">
+        <h1 class="about-title" id="aboutTitle">Mun<br>River</h1>
+        <p class="about-thai" id="aboutThai"></p>
+        <p class="about-body" id="aboutBody"></p>
+        <div class="about-value" id="aboutValue">
+          <h2 class="about-value-title" id="aboutValueTitle"></h2>
+          <p class="about-thai" id="aboutValueThai"></p>
+          <p class="about-body" id="aboutValueBody"></p>
+          <p class="about-body th-copy" id="aboutValueBodyTh"></p>
+        </div>
+        <p class="about-meta" id="aboutMeta"></p>
+        <div class="about-links">
+          <a href="#color" class="about-link" data-go="color">Coloring page</a>
+          <a href="#quiz" class="about-link" data-go="quiz">Test your knowledge</a>
+          <a href="#play" class="about-link soft" data-go="play">Back to Play</a>
+        </div>
+      </div>
+      <div class="about-photo"><img id="aboutImg" src="" alt="" draggable="false"></div>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: Loy Krathong (the festival explained from zero; the place to start) ===== -->
+  <section class="view" id="view-festival">
+    <div class="fest">
+      <div class="fest-in">
+        <header class="fest-hero">
+          <div class="fest-hero-text">
+            <p class="about-label"><b>start here</b><span></span></p>
+            <h1 class="about-title">Loy<br>Krathong</h1>
+            <p class="about-thai">ลอยกระทง</p>
+            <p class="fs-p lead">Thailand's festival of floating lights. Once a year, people gather at rivers, canals and ponds, set a small floating offering on the water, make a wish and let it drift away.</p>
+            <p class="fs-th">เทศกาลแห่งแสงเทียนลอยน้ำของไทย ปีละครั้งผู้คนจะมารวมกันที่ริมแม่น้ำ คลอง และสระน้ำ วางกระทงเล็ก ๆ ลงบนผิวน้ำ อธิษฐาน แล้วปล่อยให้มันลอยไป</p>
+          </div>
+          <div class="fest-art"><img src="assets/characters/lotus-pond.png" alt="" draggable="false"></div>
+        </header>
+
+        <h2 class="fs-h">What happens on the night<i class="th">คืนนั้นมีอะไรเกิดขึ้น</i></h2>
+        <figure class="fs-fig"><img src="assets/art/festival/walk.webp" alt="Children walking together at dusk toward the temple" loading="lazy"></figure>
+        <ol class="fs-steps">
+          <li><span>1</span><div><p>Make or buy a krathong.</p><p class="fs-th">ทำหรือซื้อกระทง</p></div></li>
+          <li><span>2</span><div><p>Go to the water with family or friends.</p><p class="fs-th">ไปที่ริมน้ำกับครอบครัวหรือเพื่อน</p></div></li>
+          <li><span>3</span><div><p>Light the candle and the incense.</p><p class="fs-th">จุดเทียนและธูป</p></div></li>
+          <li><span>4</span><div><p>Raise the krathong to your forehead, say thank you and make a wish.</p><p class="fs-th">ยกกระทงขึ้นระดับหน้าผาก กล่าวขอบคุณ และอธิษฐาน</p></div></li>
+          <li><span>5</span><div><p>Set it gently on the water and watch it drift away.</p><p class="fs-th">วางกระทงลงบนน้ำเบา ๆ แล้วมองดูมันลอยไป</p></div></li>
+        </ol>
+        <p class="fs-p">Some people add a few strands of hair or nail clippings, to symbolise letting go of bad luck or anger. Some add a coin, and children often collect the coins the next day, which is a small act of charity. Many towns also hold music, parades and contests.</p>
+        <p class="fs-th">บางคนใส่ผมหรือเล็บเล็กน้อยเพื่อเป็นสัญลักษณ์ของการปล่อยวางโชคร้ายหรือความโกรธ บางคนใส่เหรียญ และเด็ก ๆ มักมาเก็บเหรียญในวันรุ่งขึ้น ซึ่งเป็นการทำทานเล็ก ๆ หลายเมืองยังมีดนตรี ขบวนแห่ และการประกวดด้วย</p>
+
+        <figure class="fs-fig"><img src="assets/art/festival/float.webp" alt="People kneeling by the water and setting glowing krathong afloat" loading="lazy"></figure>
+        <h2 class="fs-h">What is a krathong?<i class="th">กระทงคืออะไร</i></h2>
+        <p class="fs-p">Traditionally it is a round slice of banana trunk, edged with folded banana leaves and topped with flowers, three sticks of incense and a candle. Today many are made of bread, coconut shell or other natural materials, because foam krathong stay in the water for a very long time.</p>
+        <p class="fs-th">กระทงแบบดั้งเดิมทำจากแผ่นหยวกกล้วยกลม ตกแต่งขอบด้วยใบตองพับ และประดับดอกไม้ ธูปสามดอก และเทียน ทุกวันนี้หลายคนใช้ขนมปัง กะลามะพร้าว หรือวัสดุธรรมชาติอื่น ๆ เพราะกระทงโฟมอยู่ในน้ำได้นานมาก</p>
+        <figure class="fs-fig"><img src="assets/art/festival/flowers.webp" alt="Two flower krathong with incense sticks" loading="lazy"></figure>
+
+        <h2 class="fs-h">Why do people do it?<i class="th">ทำไมถึงลอยกระทง</i></h2>
+        <figure class="fs-fig"><img src="assets/art/festival/thanks.webp" alt="Children holding up small lights that flow toward a swirl of water" loading="lazy"></figure>
+        <div class="fs-list">
+          <div><b>To thank the water</b><p>Many people thank Phra Mae Khongkha, the goddess of water, who is linked to the Ganges goddess Ganga, and ask forgiveness for the ways we misuse water.</p><p class="fs-th">หลายคนขอบคุณพระแม่คงคา เทพีแห่งสายน้ำ ซึ่งเชื่อมโยงกับเทพีคงคาแห่งแม่น้ำคงคา และขอขมาที่เราใช้น้ำไม่ถูกต้อง</p></div>
+          <div><b>To honour the Buddha</b><p>Some stories say krathong float to honour the Buddha. One legend sends them toward a footprint he left on the Namada river in India.</p><p class="fs-th">บางเรื่องเล่าว่าลอยกระทงเพื่อบูชาพระพุทธเจ้า ตำนานหนึ่งเล่าว่ากระทงลอยไปยังรอยพระพุทธบาทที่ริมแม่น้ำนัมมทาในอินเดีย</p></div>
+          <div><b>To let go</b><p>The krathong carries away bad luck, worries and anger, so you can start fresh.</p><p class="fs-th">กระทงพาโชคร้าย ความกังวล และความโกรธลอยไป เพื่อให้เราเริ่มต้นใหม่</p></div>
+          <div><b>To remember</b><p>Some people float their offering to honour their ancestors.</p><p class="fs-th">บางคนลอยกระทงเพื่อระลึกถึงบรรพบุรุษ</p></div>
+        </div>
+        <p class="fs-p">There is no single reason. People take part in whichever way feels meaningful to them.</p>
+        <p class="fs-th">ไม่มีเหตุผลเดียว ทุกคนร่วมงานในแบบที่มีความหมายกับตนเอง</p>
+
+        <h2 class="fs-h">Where did it come from?<i class="th">เริ่มต้นมาจากไหน</i></h2>
+        <p class="fs-p">A famous story says it began in the Sukhothai Kingdom, about 1238 to 1438, when a royal consort named Nang Noppamat shaped a lotus flower from leaves and floated it for the king. The story appears in a text called Tamrap Thao Si Chulalak.</p>
+        <p class="fs-th">เรื่องเล่าที่รู้จักกันดีบอกว่าเริ่มต้นในสมัยกรุงสุโขทัย ราว พ.ศ. 1781 ถึง 1981 เมื่อนางนพมาศ พระสนมของพระมหากษัตริย์ ประดิษฐ์ดอกบัวจากใบไม้แล้วลอยถวายพระองค์ เรื่องนี้ปรากฏในตำราชื่อ ตำรับท้าวศรีจุฬาลักษณ์</p>
+        <p class="fs-p">Many historians believe that text was written much later, in the 1800s, so the tale may be a beautiful legend more than a record. The custom itself is probably older and shared across Southeast Asia. A carving at the Bayon temple in Cambodia from around 1200 shows something similar. In 1863 King Rama IV wrote that Thai Buddhists had adapted a Hindu festival to honour the Buddha. In the 1900s it grew into the national festival we know today.</p>
+        <p class="fs-th">นักประวัติศาสตร์หลายคนเชื่อว่าตำรานี้แต่งขึ้นภายหลังมาก ในช่วงพุทธศตวรรษที่ 24 เรื่องนี้จึงอาจเป็นตำนานที่งดงามมากกว่าหลักฐานทางประวัติศาสตร์ ประเพณีนี้น่าจะเก่าแก่กว่าและมีร่วมกันทั่วเอเชียตะวันออกเฉียงใต้ ภาพสลักที่ปราสาทบายนในกัมพูชาราว ค.ศ. 1200 แสดงภาพคล้ายกัน ในปี 1863 รัชกาลที่ 4 ทรงบันทึกว่าชาวพุทธไทยดัดแปลงพิธีของฮินดูเพื่อบูชาพระพุทธเจ้า และในศตวรรษที่ 20 ก็กลายเป็นเทศกาลของชาติอย่างที่เรารู้จักกัน</p>
+
+        <h2 class="fs-h">Different places, different lights<i class="th">ต่างที่ ต่างแสง</i></h2>
+        <figure class="fs-fig"><img src="assets/art/festival/lights.webp" alt="A white krathong on swirling water with paper lanterns rising" loading="lazy"></figure>
+        <div class="fs-list">
+          <div><b>Yi Peng, Chiang Mai and the north</b><p>In the Lanna north, people also release sky lanterns called khom loi on the same full moon, and decorate homes and temples with lanterns.</p><p class="fs-th">ในภาคเหนือแบบล้านนา ผู้คนยังปล่อยโคมลอยในคืนพระจันทร์เต็มดวงเดียวกัน และประดับบ้านและวัดด้วยโคม</p></div>
+          <div><b>Loy Krathong Sai, Tak</b><p>Hundreds of coconut shell krathong are tied into a long line and floated as a chain of light.</p><p class="fs-th">กระทงกะลามะพร้าวหลายร้อยใบถูกร้อยต่อกันเป็นสายยาวแล้วลอยเป็นสายแสง</p></div>
+          <div><b>Sukhothai</b><p>Performances retell the story of Nang Noppamat and the first krathong.</p><p class="fs-th">มีการแสดงเล่าเรื่องนางนพมาศและกระทงใบแรก</p></div>
+        </div>
+        <p class="fs-p">Nearby countries have their own water and light festivals too, such as Bon Om Touk in Cambodia, Il Poya in Sri Lanka and Tazaungdaing in Myanmar.</p>
+        <p class="fs-th">ประเทศใกล้เคียงก็มีเทศกาลน้ำและแสงของตนเอง เช่น บอนอมตุกในกัมพูชา อิลโปยะในศรีลังกา และตาซองดายน์ในเมียนมา</p>
+
+        <figure class="fs-fig"><img src="assets/art/festival/boats.webp" alt="Wooden boats full of fruit and food on a river" loading="lazy"></figure>
+        <h2 class="fs-h">Looking after the water<i class="th">ดูแลสายน้ำ</i></h2>
+        <p class="fs-p">After the festival in 2016, Bangkok collected 661,935 krathong. About 94 out of every 100 were made of natural materials, but around 44,000 were foam. Even natural krathong add waste when thousands are floated at once, and cleaning up is a big job every year.</p>
+        <p class="fs-th">หลังเทศกาลปี 2016 กรุงเทพมหานครเก็บกระทงได้ 661,935 ใบ ประมาณ 94 ใน 100 ใบทำจากวัสดุธรรมชาติ แต่มีราว 44,000 ใบที่เป็นโฟม แม้กระทงธรรมชาติก็เพิ่มขยะเมื่อลอยพร้อมกันนับพันใบ และการเก็บกวาดเป็นงานใหญ่ทุกปี</p>
+        <div class="fs-tips">
+          <p>Choose natural materials such as banana leaf, bread or coconut shell.</p>
+          <p>Skip foam, plastic, pins and staples.</p>
+          <p>Float one krathong for a group, not one each.</p>
+          <p>Take your litter with you.</p>
+        </div>
+        <p class="fs-th">เลือกวัสดุธรรมชาติ เช่น ใบตอง ขนมปัง หรือกะลา ไม่ใช้โฟม พลาสติก เข็มหมุด และลวดเย็บกระดาษ ลอยหนึ่งกระทงต่อหนึ่งกลุ่ม และเก็บขยะกลับไปด้วย</p>
+
+        <p class="fs-src">Learn more: <a href="https://thailandfoundation.or.th/culture_heritage/loy-krathong-festival-all-you-need-to-know/" target="_blank" rel="noopener">Thailand Foundation</a> and <a href="https://en.wikipedia.org/wiki/Loy_Krathong" target="_blank" rel="noopener">Wikipedia</a>. Dates are expected dates; check official announcements.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: About us (what Loy is for) ===== -->
+  <section class="view" id="view-us">
+    <div class="about us">
+      <div class="about-text">
+        <h1 class="about-title">About<br>Loy</h1>
+        <p class="about-thai">เกี่ยวกับเรา</p>
+        <p class="about-label"><b>our aim</b><span></span></p>
+        <div class="us-copy">
+          <p>Loy is a project that wants more people to think about Loy Krathong, and the water it celebrates, all year round and not only on one night in November.</p>
+          <p>Most of us rarely think about water in daily life. We turn on the tap, wash, flush and move on. Yet our rivers carry stories, festivals and the water we all share.</p>
+          <p>So we turned Thailand's rivers into stories to read, pages to colour, a river to defend and questions to test what you know. Small habits keep these rivers alive: a shorter shower, a tap that does not drip, and a krathong that does not kill fish.</p>
+        </div>
+        <div class="us-copy th-copy">
+          <p>Loy เป็นโปรเจกต์ที่อยากให้ผู้คนนึกถึงประเพณีลอยกระทงและน้ำที่เราเฉลิมฉลอง ตลอดทั้งปี ไม่ใช่แค่คืนเดียวในเดือนพฤศจิกายน</p>
+          <p>ในชีวิตประจำวัน เรามักไม่ค่อยนึกถึงน้ำ เปิดก๊อก ล้างมือ แล้วก็ผ่านไป ทั้งที่แม่น้ำของเราเต็มไปด้วยเรื่องราว เทศกาล และน้ำที่เราทุกคนใช้ร่วมกัน</p>
+          <p>เราจึงเปลี่ยนแม่น้ำของไทยให้เป็นเรื่องราวให้อ่าน ภาพให้ระบายสี แม่น้ำให้ปกป้อง และคำถามให้ลองทดสอบความรู้ นิสัยเล็ก ๆ ช่วยให้แม่น้ำเหล่านี้ยังมีชีวิตอยู่ ทั้งอาบน้ำให้สั้นลง ก๊อกน้ำที่ไม่หยด และกระทงที่ไม่ทำร้ายปลา</p>
+        </div>
+        <div class="about-links">
+          <a href="#play" class="about-link" data-go="play">Explore the rivers</a>
+          <a href="#shop" class="about-link soft" data-go="shop">Visit the shop</a>
+        </div>
+      </div>
+      <div class="about-photo"><img src="images/about-us.png" alt="" draggable="false"></div>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: Moments (your own ring of fish; it starts empty and fills as you add photos) ===== -->
+  <section class="view" id="view-moments">
+    <div class="c-stage" id="mStage"><div class="c-ring" id="mRing"></div></div>
+    <div class="c-edge" aria-hidden="true"></div>
+    <div class="m-head">
+      <h1 class="m-h1">Moments <span class="th">ช่วงเวลา</span></h1>
+      <p class="m-sub">Fill your own ring of fish with photos of the rivers and festivals you love, and write a little reflection for each. They stay on this device unless you share them.<i class="th">เติมวงปลาของคุณด้วยภาพแม่น้ำและเทศกาลที่คุณรัก และเขียนความรู้สึกสั้น ๆ ให้แต่ละภาพ ภาพจะอยู่ในอุปกรณ์เครื่องนี้ เว้นแต่คุณจะแชร์</i></p>
+    </div>
+    <p class="c-hint" id="mHint">Tap the striped fish to add your first moment<i class="th">แตะปลาลายทางเพื่อเพิ่มช่วงเวลาแรกของคุณ</i></p>
+    <div class="m-bar">
+      <div class="m-actions">
+        <span id="mCount" class="m-count"></span>
+        <button class="pill-outline" data-go="community"><span class="bi">Community</span> <span class="th">ชุมชน</span></button>
+      </div>
+    </div>
+    <input type="file" id="mFile" accept="image/*" multiple hidden>
+  </section>
+
+  <!-- ===== VIEW: Community (fish shared by visitors) ===== -->
+  <section class="view" id="view-community">
+    <div class="c-stage" id="cStage"><div class="c-ring" id="cRing"></div></div>
+    <div class="c-edge" aria-hidden="true"></div>
+    <div class="c-head">
+      <a href="#moments" class="c-back" data-go="moments">Back to Moments · กลับ</a>
+      <h1 class="m-h1">Community <span class="th">ชุมชน</span></h1>
+      <p class="m-sub" id="cNote"></p>
+    </div>
+    <p class="c-hint">Drag to look around, tap a fish to read its story<i class="th">ลากเพื่อมองไปรอบ ๆ แตะปลาเพื่ออ่านเรื่องราว</i></p>
+  </section>
+
+  <!-- fit editor: drag, pinch or scroll to place the photo inside the fish, then write a reflection -->
+  <div class="ed" id="mEditor" aria-hidden="true">
+    <div class="ed-card">
+      <p class="ed-title">Fit your photo<i class="th">จัดภาพให้พอดีกับปลา</i></p>
+      <p class="ed-hint">Drag to move it, pinch or scroll to zoom. The faint area sits outside the fish.<i class="th">ลากเพื่อเลื่อน บีบนิ้วหรือเลื่อนล้อเมาส์เพื่อซูม ส่วนจางอยู่นอกตัวปลา</i></p>
+      <div class="ed-box" id="edBox"><img id="edGhost" class="ed-ghost" alt="" draggable="false"><span class="m-fish"><img id="edImg" alt="" draggable="false"></span></div>
+      <label class="ed-zoom"><span>Zoom<i class="th">ซูม</i></span><input type="range" id="edZoom" min="50" max="500" value="100"></label>
+      <textarea class="ed-name" id="edNote" rows="3" maxlength="280" placeholder="Write a little reflection about this moment (optional) · เขียนความรู้สึกสั้น ๆ เกี่ยวกับช่วงเวลานี้ (ไม่บังคับ)"></textarea>
+      <div class="ed-btns"><button class="pill-outline" id="edReset">Reset</button><button class="pill-outline" id="edCancel">Cancel</button><button class="pill pill-yellow" id="edOk"><span class="bi">Done</span> <span class="th">เสร็จ</span></button></div>
+    </div>
+  </div>
+
+  <!-- zoom view: the whole fish grows -->
+  <div class="lb" id="lightbox" aria-hidden="true">
+    <button class="lb-x" id="lbClose" aria-label="Close">×</button>
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">‹</button>
+    <div class="lb-box" id="lbBox"><span class="m-fish"><img id="lbImg" alt="" draggable="false"></span></div>
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Next">›</button>
+    <p class="lb-cap" id="lbCap"></p>
+    <div class="lb-act" id="lbActions" hidden>
+      <button class="pill-outline" id="lbEdit"><span class="bi">Adjust</span> <span class="th">ปรับ</span></button>
+      <button class="pill-outline" id="lbShare"></button>
+      <button class="pill-outline" id="lbDel"><span class="bi">Remove</span> <span class="th">ลบ</span></button>
+    </div>
+    <div class="lb-zoom"><button id="lbOut" aria-label="Zoom out">−</button><button id="lbIn" aria-label="Zoom in">+</button></div>
+    <p class="lb-hint">Drag, pinch or scroll to look closer<i class="th">ลาก บีบนิ้ว หรือเลื่อนเพื่อดูใกล้ขึ้น</i></p>
+  </div>
+
+  <!-- ===== VIEW: Shop (swap points for things) ===== -->
+  <section class="view" id="view-shop">
+    <div class="shop">
+      <div class="shop-top">
+        <span class="shop-points"><small>Your points<i class="th">แต้มของคุณ</i></small><b id="shopPoints">0</b></span>
+        <button class="pill pill-outline" id="shopCart"><span class="bi">Cart<i class="th">ตะกร้า</i></span> <span id="shopCartCount">0</span></button>
+        <button class="pill pill-solid" id="shopBag"><span class="bi">My items<i class="th">ของของฉัน</i></span> <span id="shopBagCount">0</span></button>
+      </div>
+      <div class="shop-rec">
+        <div class="shop-mode" role="group" aria-label="How to get it">
+          <button type="button" data-mode="points" class="on"><span class="bi">Points<i class="th">แต้ม</i></span></button>
+          <button type="button" data-mode="money"><span class="bi">Buy<i class="th">ซื้อ</i></span></button>
+        </div>
+        <label class="shop-cat"><select id="shopCat" aria-label="Choose a category"></select></label>
+      </div>
+      <div class="shop-wrap">
+        <button class="shop-arrow left" id="shopPrev" aria-label="Previous"><svg viewBox="0 0 24 48" aria-hidden="true"><path d="M20 2 4 24l16 22"/></svg></button>
+        <div class="shop-track" id="shopTrack"></div>
+        <button class="shop-arrow right" id="shopNext" aria-label="Next"><svg viewBox="0 0 24 48" aria-hidden="true"><path d="M4 2l16 22L4 46"/></svg></button>
+      </div>
+      <footer class="shop-foot">
+        <img src="assets/logo/logo-dark.png" alt="" class="shop-foot-logo">
+        <p class="shop-foot-line"><span class="bi">Thinking about water, all year round<i class="th">คิดถึงน้ำ ตลอดทั้งปี</i></span></p>
+        <p class="shop-foot-links"><a href="#us" data-go="us">About us</a><span aria-hidden="true">·</span><a href="#play" data-go="play">Explore the rivers</a></p>
+        <p class="shop-foot-small">Loy 2026</p>
+      </footer>
+    </div>
+    <div class="shop-modal" id="shopModal">
+      <div class="shop-modal-box">
+        <h2 id="shopModalTitle"></h2>
+        <div id="shopModalBody"></div>
+        <button class="pill pill-solid" id="shopModalClose"><span class="bi">Close<i class="th">ปิด</i></span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: Quiz (Loy Krathong and water saving) ===== -->
+  <section class="view" id="view-quiz">
+    <div class="quiz">
+      <div class="quiz-inner">
+        <h1 class="quiz-title">Test your<br>knowledge</h1>
+        <div id="quizBody"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: Defend the river (tower defence) ===== -->
+  <section class="view" id="view-game">
+    <div class="td">
+      <div class="td-hud">
+        <a href="#play" class="td-back" data-go="play">← Back</a>
+        <span class="td-hp" id="tdHp" aria-label="River health"></span>
+        <button class="td-speed" id="tdSpeed" aria-label="Game speed">1×</button>
+      </div>
+      <div class="td-main">
+        <div class="td-board" id="tdBoard">
+          <canvas id="tdCanvas"></canvas>
+          <div class="td-banner" id="tdBanner"></div>
+          <div class="td-pop" id="tdPop"><b></b><small></small><button class="pill pill-yellow" id="tdRetreat">Take back</button></div>
+          <div class="td-overlay" id="tdIntro">
+            <div class="td-card-box">
+              <h2 id="tdIntroTitle">Defend the river!</h2>
+              <p class="td-diff" id="tdIntroDiff"></p>
+              <p id="tdIntroText"></p>
+              <button class="pill pill-yellow" id="tdStart">Start</button>
+            </div>
+          </div>
+          <div class="td-overlay" id="tdEnd">
+            <div class="td-card-box">
+              <h2 id="tdEndTitle">Oh no!</h2>
+              <p id="tdEndText"></p>
+              <button class="pill pill-yellow" id="tdRetry">Try again</button>
+              <a href="#play" class="back-link-inline" data-go="play">Back to Play</a>
+            </div>
+          </div>
+        </div>
+        <div class="td-side">
+          <p class="td-tip" id="tdTip"></p>
+          <div class="td-bottom">
+            <span class="td-dp" title="Deploy points: what fish cost to place"><small>DP</small><b id="tdDp">0</b><i class="td-dpbar"><u id="tdDpBar"></u></i></span>
+            <div class="td-tray" id="tdTray"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: Reveal after the game ===== -->
+  <section class="view" id="view-reveal">
+    <img class="reveal-img" id="revealImg" src="assets/art/reveal-logo.png" alt="">
+    <div class="reveal-copy">
+      <h2 id="revealTitle">You saved the river!</h2>
+      <p id="revealBody">Every river has stories to tell, and you helped keep this one clean.</p>
+      <p class="reveal-points" id="revealPoints"></p>
+      <a href="#color" class="link-btn" data-go="color">Let’s color!</a>
+      <a href="#festival" class="link-btn soft" data-go="festival"><span>About Loy Krathong</span><i class="th">เกี่ยวกับลอยกระทง</i></a>
+      <a href="#play" class="back-link-inline" data-go="play">Back to Play</a>
+    </div>
+  </section>
+
+  <!-- ===== VIEW: Coloring ===== -->
+  <section class="view" id="view-color">
+    <a href="#play" class="back-top" data-go="play">← Back to Play</a>
+
+    <div class="paint-stage" id="paintStage">
+      <canvas id="paint"></canvas>
+      <img id="art" src="assets/art/coloring-page.png" alt="Coloring page" draggable="false">
+    </div>
+
+    <div class="tools">
+      <div class="btn-grid">
+        <button class="pill-outline" id="btnStartOver">Start over</button>
+        <button class="pill-outline" id="btnEraser" aria-pressed="false">Eraser</button>
+        <button class="pill-outline" id="btnSave">Save</button>
+        <button class="pill-outline" id="btnShare">Share</button>
+      </div>
+
+      <div class="palette-wrap">
+        <span class="pick-hint" id="pickHint">Pick a<br>color</span>
+        <div class="palette" id="palette" role="radiogroup" aria-label="Colors"></div>
+      </div>
+
+      <input type="range" id="size" min="6" max="80" value="30" aria-label="Brush size">
+    </div>
+
+    <div class="brush-cursor" id="brushCursor"></div>
+  </section>
+
+  <!-- yellow loading screen shown between pages -->
+  <div id="intro">
+    <img class="intro-logo" src="assets/logo/logo-dark.png" alt="Loy" draggable="false">
+    <div class="intro-text">
+      <b>Tap the fish</b><i class="th">แตะที่ปลา</i>
+      <svg viewBox="0 0 40 56" width="34" height="48" aria-hidden="true"><path d="M20 3 C 6 14, 34 26, 20 48" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><path d="M10 40 L20 51 L31 39" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="intro-ring"></div>
+  </div>
+  <div id="loader" aria-hidden="true">
+    <img id="loaderFish" src="" alt="" draggable="false">
+    <div class="loader-bar"><i id="loaderFill"></i></div>
+    <p id="loaderFact" class="loader-fact"></p>
+  </div>
+
+  <canvas id="confetti"></canvas>
+  <div id="ripples" aria-hidden="true"></div>
+  <div class="fade-bottom"></div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="app.js"></script>
+  <script src="shop.js"></script>
+  <script src="game.js"></script>
+  <script src="quiz.js"></script>
+  <script src="moments.js"></script>
+</body>
+</html>
